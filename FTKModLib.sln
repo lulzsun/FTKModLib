@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTKModLib", "FTKModLib.csproj", "{EFC49935-3C4A-4F26-A9D1-C64DE3BD9F4E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTKModLib", "FTKModLib\FTKModLib.csproj", "{6E0DC604-00FF-4A10-AB2D-D65A82922E7E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTKModLib.Example", "FTKModLib.Example\FTKModLib.Example.csproj", "{CFDECEE2-D755-4BCB-9DC9-7C671086356A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +13,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EFC49935-3C4A-4F26-A9D1-C64DE3BD9F4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EFC49935-3C4A-4F26-A9D1-C64DE3BD9F4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EFC49935-3C4A-4F26-A9D1-C64DE3BD9F4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EFC49935-3C4A-4F26-A9D1-C64DE3BD9F4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E0DC604-00FF-4A10-AB2D-D65A82922E7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E0DC604-00FF-4A10-AB2D-D65A82922E7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E0DC604-00FF-4A10-AB2D-D65A82922E7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E0DC604-00FF-4A10-AB2D-D65A82922E7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFDECEE2-D755-4BCB-9DC9-7C671086356A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFDECEE2-D755-4BCB-9DC9-7C671086356A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFDECEE2-D755-4BCB-9DC9-7C671086356A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFDECEE2-D755-4BCB-9DC9-7C671086356A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {DB7C2B8C-B59E-4189-8812-DABD23FEBA0E}
+		SolutionGuid = {1B734ABC-5247-4F2E-97B0-80C99EF2F6BB}
 	EndGlobalSection
 EndGlobal

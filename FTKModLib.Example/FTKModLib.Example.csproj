@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>
-    <AssemblyName>FTKModLib</AssemblyName>
-    <Description>Unofficial For The King Modding Library</Description>
+    <AssemblyName>FTKModLib.Example</AssemblyName>
+    <Description>Example mod using FTKModLib</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>
@@ -21,11 +21,16 @@
   </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\FTKModLib\FTKModLib.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\Games\SteamLibrary\steamapps\common\For The King\FTK_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\Games\SteamLibrary\steamapps\common\For The King\FTK_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\Games\SteamLibrary\steamapps\common\For The King\FTK_Data\Managed\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\..\Games\SteamLibrary\steamapps\common\For The King\FTK_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
+
 </Project>
