@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using FTKModLib.Managers;
+using FTKModLib.Objects;
 using GridEditor;
 using HarmonyLib;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace FTKModLib.Example {
         private void Awake() {
             Logger.LogInfo($"Plugin {PLUGIN_GUID} is loaded!");
 
-            ItemManager.Instance.AddItem(new FTK_items() {
+            ItemManager.Instance.AddItem(new CustomItem() {
                 _shopStock = 69,
                 m_TownMarket = true,
                 m_ID = "CustomItem1",
