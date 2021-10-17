@@ -18,9 +18,11 @@ namespace FTKModLib.Example {
             Logger.LogInfo($"Plugin {PLUGIN_GUID} is loaded!");
 
             ItemManager.Instance.AddItem(new CustomItem() {
+                m_ID = "CustomItem1",
+                name = new CustomLocalizedString("Example Item"),
+                description = new CustomLocalizedString("This is the super powerful ultra example item!\n\nIt does nothing."),
                 _shopStock = 69,
                 m_TownMarket = true,
-                m_ID = "CustomItem1",
             });
 
             Harmony harmony = new Harmony(PLUGIN_GUID);

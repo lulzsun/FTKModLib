@@ -86,8 +86,8 @@ namespace FTKModLib.Managers {
         [HarmonyPatch(typeof(FTK_itembase), "GetLocalizedName")]
         class FTK_itembase_GetLocalizedName_Patch {
             static bool Prefix(ref string __result, FTK_itembase __instance) {
-                if (ItemManager.Instance.enums.ContainsKey(__instance.m_ID)) {
-                    __result = __instance.m_ID; // just return the id name for now...
+                if (ItemManager.Instance.enums.TryGetValue(__instance.m_ID, out int dictKey)) {
+                    __result = ItemManager.Instance.itemsDictionary[dictKey].GetName();
                     return false;
                 }
                 return true;
@@ -106,20 +106,6 @@ namespace FTKModLib.Managers {
                     FieldInfo protected_ItemID = customItem.GetType().GetField("m_ItemID", BindingFlags.NonPublic | BindingFlags.Instance);
                     protected_ItemID.SetValue(customItem, _id);
                     __result = customItem;
-                    return false;
-                }
-                return true;
-            }
-        }
-
-        [HarmonyPatch(typeof(FTKItem), "GetDescription")]
-        class FTKItemName_FTKItem_GetDescription_Patch {
-            static bool Prefix(ref string __result, FTKItem __instance, CharacterOverworld _cow) {
-                FieldInfo protected_ItemID = __instance.GetType().GetField("m_ItemID", BindingFlags.NonPublic | BindingFlags.Instance);
-                FTK_itembase.ID m_ItemId = (FTK_itembase.ID)protected_ItemID.GetValue(__instance);
-
-                if (ItemManager.Instance.enums.ContainsValue((int)m_ItemId)) {
-                    __result = "This custom item is missing a description!";
                     return false;
                 }
                 return true;

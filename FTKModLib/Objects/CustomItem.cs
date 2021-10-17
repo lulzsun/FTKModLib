@@ -1,5 +1,7 @@
 ﻿using FTKItemName;
+using Google2u;
 using GridEditor;
+using System.Reflection;
 using UnityEngine;
 
 namespace FTKModLib.Objects {
@@ -11,10 +13,70 @@ namespace FTKModLib.Objects {
         public T Get<T>() where T : FTK_items {
             return (T)info;
         }
-
+        /// <summary>
+        /// This is the lookup string for the item, recommended to make this as unique as possible
+        /// </summary>
         public string m_ID {
             get => info.m_ID;
             set => info.m_ID = value;
+        }
+        private TextItemsRow textItemsRow;
+        private CustomLocalizedString _name;
+        /// <summary>
+        /// This is the item's ingame display name, supports localized language
+        /// </summary>
+        public CustomLocalizedString name {
+            get => _name;
+            set {
+                textItemsRow = new TextItemsRow(
+                    m_ID,
+                    value._en, value._fr, value._it,
+                    value._de, value._es, value._pt_br,
+                    value._ru, value._zh_cn, value._zh_tw,
+                    value._pl, value._ja, value._ko
+                );
+                _name = value;
+            }
+        }
+        public string GetName() {
+            if (textItemsRow == null) {
+                return m_ID;
+            }
+            MethodInfo private_LocalizeRelease = typeof(FTKHub).GetMethod("LocalizeRelease", BindingFlags.NonPublic | BindingFlags.Static);
+            return (string)private_LocalizeRelease.Invoke(private_LocalizeRelease, new object[] { textItemsRow });
+        }
+        private TextItemsDescriptionRow textItemsDescriptionRow;
+        private CustomLocalizedString _description;
+        /// <summary>
+        /// This is the item's ingame description, supports localized language
+        /// </summary>
+        public CustomLocalizedString description {
+            get => _description;
+            set {
+                textItemsDescriptionRow = new TextItemsDescriptionRow(
+                    m_ID,
+                    value._en, value._fr, value._it,
+                    value._de, value._es, value._pt_br,
+                    value._ru, value._zh_cn, value._zh_tw,
+                    value._pl, value._ja, value._ko
+                );
+                _description = value;
+            }
+        }
+        public override string GetDescription(CharacterOverworld _cow) {
+            if (!string.IsNullOrEmpty(this.GetCannotUseReason(_cow))) {
+                return this.GetCannotUseReason(_cow);
+            }
+            if(textItemsDescriptionRow == null) {
+                return "This custom item is missing a description!";
+            }
+            MethodInfo private_LocalizeRelease = typeof(FTKHub).GetMethod("LocalizeRelease", BindingFlags.NonPublic | BindingFlags.Static);
+            string format = (string)private_LocalizeRelease.Invoke(private_LocalizeRelease, new object[] { textItemsDescriptionRow });
+            int num = this.GetValue(_cow);
+            if (num < 0 && this.DisplayPositiveValue()) {
+                num *= -1;
+            }
+            return string.Format(format, num);
         }
         public FTK_itemRarityLevel.ID m_ItemRarity {
             get => info.m_ItemRarity;

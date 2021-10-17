@@ -24,6 +24,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\Games\SteamLibrary\steamapps\common\For The King\FTK_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\..\Games\SteamLibrary\steamapps\common\For The King\FTK_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\..\Games\SteamLibrary\steamapps\common\For The King\FTK_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
