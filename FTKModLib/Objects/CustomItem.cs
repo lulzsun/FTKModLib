@@ -16,51 +16,51 @@ namespace FTKModLib.Objects {
         /// <summary>
         /// This is the lookup string for the item, recommended to make this as unique as possible
         /// </summary>
-        public string m_ID {
+        public string ID {
             get => info.m_ID;
             set => info.m_ID = value;
         }
         private TextItemsRow textItemsRow;
-        private CustomLocalizedString _name;
+        private CustomLocalizedString name;
         /// <summary>
         /// This is the item's ingame display name, supports localized language
         /// </summary>
-        public CustomLocalizedString name {
-            get => _name;
+        public CustomLocalizedString Name {
+            get => name;
             set {
                 textItemsRow = new TextItemsRow(
-                    m_ID,
+                    ID,
                     value._en, value._fr, value._it,
                     value._de, value._es, value._pt_br,
                     value._ru, value._zh_cn, value._zh_tw,
                     value._pl, value._ja, value._ko
                 );
-                _name = value;
+                name = value;
             }
         }
         public string GetName() {
             if (textItemsRow == null) {
-                return m_ID;
+                return ID;
             }
             MethodInfo private_LocalizeRelease = typeof(FTKHub).GetMethod("LocalizeRelease", BindingFlags.NonPublic | BindingFlags.Static);
             return (string)private_LocalizeRelease.Invoke(private_LocalizeRelease, new object[] { textItemsRow });
         }
         private TextItemsDescriptionRow textItemsDescriptionRow;
-        private CustomLocalizedString _description;
+        private CustomLocalizedString description;
         /// <summary>
         /// This is the item's ingame description, supports localized language
         /// </summary>
-        public CustomLocalizedString description {
-            get => _description;
+        public CustomLocalizedString Description {
+            get => description;
             set {
                 textItemsDescriptionRow = new TextItemsDescriptionRow(
-                    m_ID,
+                    ID,
                     value._en, value._fr, value._it,
                     value._de, value._es, value._pt_br,
                     value._ru, value._zh_cn, value._zh_tw,
                     value._pl, value._ja, value._ko
                 );
-                _description = value;
+                description = value;
             }
         }
         public override string GetDescription(CharacterOverworld _cow) {
@@ -78,75 +78,75 @@ namespace FTKModLib.Objects {
             }
             return string.Format(format, num);
         }
-        public FTK_itemRarityLevel.ID m_ItemRarity {
+        public FTK_itemRarityLevel.ID ItemRarity {
             get => info.m_ItemRarity;
             set => info.m_ItemRarity = value;
         }
-        public string[] m_OnUseStatIncrementIDs {
+        public string[] OnUseStatIncrementIDs {
             get => info.m_OnUseStatIncrementIDs;
             set => info.m_OnUseStatIncrementIDs = value;
         }
-        public bool m_SuppressUseSound {
+        public bool SuppressUseSound {
             get => info.m_SuppressUseSound;
             set => info.m_SuppressUseSound = value;
         }
-        public FTK_itembase.ObjectSlot m_ObjectSlot {
+        public FTK_itembase.ObjectSlot ObjectSlot {
             get => info.m_ObjectSlot;
             set => info.m_ObjectSlot = value;
         }
-        public FTK_itembase.ObjectType m_ObjectType {
+        public FTK_itembase.ObjectType ObjectType {
             get => info.m_ObjectType;
             set => info.m_ObjectType = value;
         }
-        public bool m_CursedItem {
+        public bool CursedItem {
             get => info.m_CursedItem;
             set => info.m_CursedItem = value;
         }
-        public bool m_BackpackEquip {
+        public bool BackpackEquip {
             get => info.m_BackpackEquip;
             set => info.m_BackpackEquip = value;
         }
-        public string m_CollectLoreItemUnlock {
+        public string CollectLoreItemUnlock {
             get => info.m_CollectLoreItemUnlock;
             set => info.m_CollectLoreItemUnlock = value;
         }
-        public bool m_FilterDebug {
+        public bool FilterDebug {
             get => info.m_FilterDebug;
             set => info.m_FilterDebug = value;
         }
-        public bool m_FilterEndDungeon {
+        public bool FilterEndDungeon {
             get => info.m_FilterEndDungeon;
             set => info.m_FilterEndDungeon = value;
         }
-        public bool m_Dropable {
+        public bool Dropable {
             get => info.m_Dropable;
             set => info.m_Dropable = value;
         }
-        public bool m_DungeonMerchant {
+        public bool DungeonMerchant {
             get => info.m_DungeonMerchant;
             set => info.m_DungeonMerchant = value;
         }
-        public bool m_TownMarket {
+        public bool TownMarket {
             get => info.m_TownMarket;
             set => info.m_TownMarket = value;
         }
-        public int m_MaxLevel {
+        public int MaxLevel {
             get => info.m_MaxLevel;
             set => info.m_MaxLevel = value;
         }
-        public bool m_NightMarket {
+        public bool NightMarket {
             get => info.m_NightMarket;
             set => info.m_NightMarket = value;
         }
-        public bool m_PriceScale {
+        public bool PriceScale {
             get => info.m_PriceScale;
             set => info.m_PriceScale = value;
         }
-        public int _shopStock {
+        public int ShopStock {
             get => info._shopStock;
             set => info._shopStock = value;
         }
-        public int _goldValue {
+        public int GoldValue {
             get => info._goldValue;
             set => info._goldValue = value;
         }
