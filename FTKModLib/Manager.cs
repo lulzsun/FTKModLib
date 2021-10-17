@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using BepInEx;
+using UnityEngine;
 
 namespace FTKModLib {
     /// <summary>

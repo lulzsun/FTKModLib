@@ -1,4 +1,5 @@
-﻿using FTKItemName;
+﻿using BepInEx;
+using FTKItemName;
 using FTKModLib.Objects;
 using FTKModLib.Utils;
 using GridEditor;
@@ -29,14 +30,16 @@ namespace FTKModLib.Managers {
         public Dictionary<string, int> enums = new();
         public Dictionary<int, CustomItem> itemsDictionary = new();
         public List<CustomItem> itemsList = new();
-        public bool AddItem(CustomItem customItem) {
-            itemsList.Add(customItem);
-            string itemJson = JsonConvert.SerializeObject(customItem.Get<FTK_items>(), Formatting.Indented, new JsonSerializerSettings() {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Error = (serializer, err) => err.ErrorContext.Handled = true,
-                ContractResolver = new IgnorePropertiesResolver(new[] { "_icon", "_iconNonClickable", "_prefab", "m_Icon", "m_IconNonClickable", "m_Prefab" })
-            });
-            Debug.Log($"{itemJson}"); //displayed for debug purposes, remove later?
+
+        /// <summary>
+        /// Add a custom item.
+        /// </summary>
+        /// <param name="customItem">The custom item to be added.</param>
+        /// <param name="plugin">Allows FTKModLib to know which plugin called this method. Not required but recommended to make debugging easier.</param>
+        /// <returns></returns>
+        public static bool AddItem(CustomItem customItem, BaseUnityPlugin plugin=null) {
+            if(plugin != null) customItem.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
+            Instance.itemsList.Add(customItem);
             return true;
         }
 
@@ -55,31 +58,46 @@ namespace FTKModLib.Managers {
             /// FTK_itemDB injection point
             /// </summary>
             static void Postfix() {
-                //LOAD CUSTOM ITEMS
+                // LOAD CUSTOM ITEMS
                 int successfulLoads = 0;
                 ItemManager itemManager = ItemManager.Instance;
                 TableManager tableManager = TableManager.Instance;
 
                 Debug.Log("Preparing to load custom items");
-                itemManager.itemsList.Sort(); //will keep Enums in sync?
-                foreach (var item in itemManager.itemsList) {
-                    if (item == null) continue;
-
-                    FTK_items ftk_Items = item.Get<FTK_items>();
-
-                    if (!itemManager.enums.ContainsKey(ftk_Items.m_ID)) {
-                        //Anything over 100000? is a weapon, anything under is a regular item.
-                        if (!ftk_Items.m_IsWeapon) itemManager.enums.Add(ftk_Items.m_ID, 100000 - itemManager.itemsList.Count);
-                        else itemManager.enums.Add(ftk_Items.m_ID, (int)Enum.GetValues(typeof(FTK_itembase.ID)).Cast<FTK_itembase.ID>().Max() + itemManager.itemsList.Count);
-                        itemManager.itemsDictionary.Add(itemManager.enums[ftk_Items.m_ID], item);
+                itemManager.itemsDictionary.Clear();
+                itemManager.enums.Clear();
+                itemManager.itemsList.Sort(delegate (CustomItem x, CustomItem y) {
+                    return x.ID.CompareTo(y.ID);
+                });//will keep Enums in sync?
+                List <CustomItem> brokenItems = new();
+                foreach (CustomItem item in itemManager.itemsList) {
+                    try {
+                        item.ForceUpdatePrefab(); // this is necessary to apply Weapon fields
+                        FTK_itembase itemDetails = item.itemDetails;
+                        itemManager.enums.Add(itemDetails.m_ID,
+                            // Anything over 100000? is a weapon, anything under is a regular item.
+                            !item.IsWeapon ? 100000 - itemManager.itemsList.Count : 
+                            itemManager.itemsList.Count + (int)Enum.GetValues(typeof(FTK_itembase.ID)).Cast<FTK_itembase.ID>().Max() - brokenItems.Count
+                        );
+                        itemManager.itemsDictionary.Add(itemManager.enums[itemDetails.m_ID], item);
+                        GEDataArrayBase geDataArrayBase = tableManager.Get(!item.IsWeapon ? typeof(FTK_itemsDB) : typeof(FTK_weaponStats2DB));
+                        geDataArrayBase.AddEntry(itemDetails.m_ID);
+                        if (!item.IsWeapon) ((FTK_itemsDB)geDataArrayBase).m_Array[tableManager.Get<FTK_itemsDB>().m_Array.Length - 1] = (FTK_items)itemDetails;
+                        else ((FTK_weaponStats2DB)geDataArrayBase).m_Array[tableManager.Get<FTK_weaponStats2DB>().m_Array.Length - 1] = item.weaponDetails;
+                        geDataArrayBase.CheckAndMakeIndex();
+                        successfulLoads++;
+                        Debug.Log($"Loaded '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
                     }
-
-                    tableManager.Get<FTK_itemsDB>().AddEntry(ftk_Items.m_ID);
-                    tableManager.Get<FTK_itemsDB>().m_Array[TableManager.Instance.Get<FTK_itemsDB>().m_Array.Length - 1] = ftk_Items;
-                    tableManager.Get<FTK_itemsDB>().CheckAndMakeIndex();
-                    successfulLoads++;
+                    catch (Exception e) {
+                        Debug.LogError(e);
+                        brokenItems.Add(item);
+                        Debug.LogError($"Failed to load '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
+                    }
                 }
-                Debug.Log($"Successfully loaded {successfulLoads} custom items");
+                foreach(CustomItem item in brokenItems) {
+                    itemManager.itemsList.Remove(item);
+                }
+                Debug.Log($"Successfully loaded {successfulLoads} out of {itemManager.itemsList.Count} custom items");
             }
         }
 
