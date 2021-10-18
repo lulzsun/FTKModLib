@@ -37,8 +37,8 @@ namespace FTKModLib.Managers {
         /// <param name="customItem">The custom item to be added.</param>
         /// <param name="plugin">Allows FTKModLib to know which plugin called this method. Not required but recommended to make debugging easier.</param>
         /// <returns></returns>
-        public static bool AddItem(CustomItem customItem, BaseUnityPlugin plugin=null) {
-            if(plugin != null) customItem.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
+        public static bool AddItem(CustomItem customItem, BaseUnityPlugin plugin = null) {
+            if (plugin != null) customItem.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
             Instance.itemsList.Add(customItem);
             return true;
         }
@@ -49,7 +49,9 @@ namespace FTKModLib.Managers {
     }
 
     /// <summary>
-    ///    The patches necessary to make adding custom items possible.
+    ///    <para>The patches necessary to make adding custom items possible.</para>
+    ///    <para>Many of them are used to fix issues calling an invalid 'FTK_itembase.ID' 
+    ///    by substituting with 'ItemManager.enums' dictionary value.</para>
     /// </summary>
     class HarmonyPatches {
         [HarmonyPatch(typeof(TableManager), "Initialize")]
@@ -69,22 +71,24 @@ namespace FTKModLib.Managers {
                 itemManager.itemsList.Sort(delegate (CustomItem x, CustomItem y) {
                     return x.ID.CompareTo(y.ID);
                 });//will keep Enums in sync?
-                List <CustomItem> brokenItems = new();
+                List<CustomItem> brokenItems = new();
                 foreach (CustomItem item in itemManager.itemsList) {
                     try {
                         item.ForceUpdatePrefab(); // this is necessary to apply Weapon fields
                         FTK_itembase itemDetails = item.itemDetails;
                         itemManager.enums.Add(itemDetails.m_ID,
                             // Anything over 100000? is a weapon, anything under is a regular item.
-                            !item.IsWeapon ? 100000 - itemManager.itemsList.Count : 
+                            !item.IsWeapon ? 100000 - itemManager.itemsList.Count :
                             itemManager.itemsList.Count + (int)Enum.GetValues(typeof(FTK_itembase.ID)).Cast<FTK_itembase.ID>().Max() - brokenItems.Count
                         );
                         itemManager.itemsDictionary.Add(itemManager.enums[itemDetails.m_ID], item);
                         GEDataArrayBase geDataArrayBase = tableManager.Get(!item.IsWeapon ? typeof(FTK_itemsDB) : typeof(FTK_weaponStats2DB));
-                        geDataArrayBase.AddEntry(itemDetails.m_ID);
-                        if (!item.IsWeapon) ((FTK_itemsDB)geDataArrayBase).m_Array[tableManager.Get<FTK_itemsDB>().m_Array.Length - 1] = (FTK_items)itemDetails;
-                        else ((FTK_weaponStats2DB)geDataArrayBase).m_Array[tableManager.Get<FTK_weaponStats2DB>().m_Array.Length - 1] = item.weaponDetails;
-                        geDataArrayBase.CheckAndMakeIndex();
+                        if (!geDataArrayBase.IsContainID(itemDetails.m_ID)) {
+                            geDataArrayBase.AddEntry(itemDetails.m_ID);
+                            if (!item.IsWeapon) ((FTK_itemsDB)geDataArrayBase).m_Array[tableManager.Get<FTK_itemsDB>().m_Array.Length - 1] = (FTK_items)itemDetails;
+                            else ((FTK_weaponStats2DB)geDataArrayBase).m_Array[tableManager.Get<FTK_weaponStats2DB>().m_Array.Length - 1] = item.weaponDetails;
+                            geDataArrayBase.CheckAndMakeIndex();
+                        }
                         successfulLoads++;
                         Debug.Log($"Loaded '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
                     }
@@ -94,10 +98,24 @@ namespace FTKModLib.Managers {
                         Debug.LogError($"Failed to load '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
                     }
                 }
-                foreach(CustomItem item in brokenItems) {
+                foreach (CustomItem item in brokenItems) {
                     itemManager.itemsList.Remove(item);
                 }
                 Debug.Log($"Successfully loaded {successfulLoads} out of {itemManager.itemsList.Count} custom items");
+            }
+        }
+
+        [HarmonyPatch(typeof(FTK_itembase), "GetItemBase")]
+        class FTK_itembase_GetItemBase_Patch {
+            static bool Prefix(ref FTK_itembase __result, FTK_itembase.ID _id) {
+                if (ItemManager.Instance.itemsDictionary.TryGetValue((int)_id, out CustomItem customItem)) {
+                    if (!customItem.IsWeapon)
+                        __result = customItem.itemDetails;
+                    else
+                        __result = customItem.weaponDetails;
+                    return false;
+                }
+                return true;
             }
         }
 
@@ -142,6 +160,17 @@ namespace FTKModLib.Managers {
             }
         }
 
+        [HarmonyPatch(typeof(FTK_weaponStats2DB), "GetEntry")]
+        class FTK_weaponStats2DB_GetEntry_Patch {
+            static bool Prefix(ref FTK_weaponStats2 __result, FTK_itembase.ID _enumID) {
+                if (ItemManager.Instance.itemsDictionary.TryGetValue((int)_enumID, out CustomItem customItem)) {
+                    __result = customItem.weaponDetails;
+                    return false;
+                }
+                return true;
+            }
+        }
+
         [HarmonyPatch(typeof(FTK_weaponStats2DB), "GetIntFromID")]
         class FTK_weaponStats2DB_GetIntFromID_Patch {
             static bool Prefix(ref int __result, FTK_weaponStats2DB __instance, string _id) {
@@ -163,6 +192,28 @@ namespace FTKModLib.Managers {
                     return false;
                 }
                 return true;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Debug patches that may assist in debugging FTKModLib
+    /// </summary>
+    class HarmonyDebugPatches {
+        //[HarmonyPatch(typeof(FTKNetworkObject), "StateDataDeserialize")]
+        class FTKNetworkObject_StateDataDeserialize_Patch {
+            static void Prefix(string _s, bool _callDone = true) {
+                Debug.LogError("DESERIALIZED:");
+                Debug.LogError(_s);
+            }
+        }
+
+        //[HarmonyPatch(typeof(FTKNetworkObject), "StateDataSerialize")]
+        class FTKNetworkObject_StateDataSerialize_Patch {
+            static void Postfix(ref string __result, bool _prep = true) {
+                Debug.LogError("SERIALIZED:");
+                Debug.LogError(__result);
             }
         }
     }

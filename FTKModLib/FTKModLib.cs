@@ -25,6 +25,12 @@ namespace FTKModLib {
                 manager.Init();
             }
 
+            // This is required for proper serialization for CustomObjects
+            // which use an Enum as an identifier.
+            // Otherwise, saving and loading games would not work if this
+            // was false.
+            FullSerializer.fsConfig.SerializeEnumsAsInteger = true;
+
             Harmony harmony = new Harmony(PLUGIN_GUID);
             harmony.PatchAll();
         }
