@@ -14,11 +14,15 @@ You are now ready to launch the game and mod away!
 There is a provided example plugin(s) made with the use of the library located in the Examples folder.
 
 ## Features
+#### Objects
+- **CustomItem**  
+Can create an item with full custom functionality or inherit functionality from existing items (herbs, orbs, armor, weapons).
+
 #### Managers
-- **Item Manager**  
-Allows the modification and creation of items (herbs, orbs, armor, weapons). As simple as ```ItemManager.AddItem();``` !
-- **Class Manager**  
-Allows the modification and creation of classes (blacksmith, hunter, scholar...etc). As simple as ```ClassManager.AddClass();``` !
+- **ItemManager**  
+Allows the modification and addition of items. As simple as ```ItemManager.AddItem(new CustomItem());``` !
+- **ClassManager**  
+Allows the modification and addition of classes. As simple as ```ClassManager.AddClass(new CustomClass());``` !
 
 ## Special thanks to
 [999gary](https://github.com/999gary)/[FTKExampleItemMod](https://github.com/999gary/FTKExampleItemMod) used as learning reference
