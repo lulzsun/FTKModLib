@@ -1,6 +1,5 @@
 ﻿using BepInEx;
 using HarmonyLib;
-using System.Collections.Generic;
 using FTKModLib.Managers;
 
 namespace FTKModLib {
@@ -15,19 +14,20 @@ namespace FTKModLib {
             Instance = this;
 
             Utils.Logger.Init();
-            Utils.Logger.LogInfo($"Plugin {PLUGIN_GUID} is loaded!");
 
-            AssetManager.Instance.Init();
-            ItemManager.Instance.Init();
-            
             // This is required for proper serialization for CustomObjects
             // which use an Enum as an identifier.
             // Otherwise, saving and loading games would not work if this
             // was false.
             FullSerializer.fsConfig.SerializeEnumsAsInteger = true;
 
+            AssetManager.Instance.Init();
+            ItemManager.Instance.Init();
+
             Harmony harmony = new Harmony(PLUGIN_GUID);
             harmony.PatchAll();
+
+            Utils.Logger.LogInfo($"Plugin {PLUGIN_GUID} is loaded!");
         }
     }
 }
