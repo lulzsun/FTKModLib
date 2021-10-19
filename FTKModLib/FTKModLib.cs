@@ -4,11 +4,10 @@ using System.Collections.Generic;
 using FTKModLib.Managers;
 
 namespace FTKModLib {
-    [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
+    [BepInPlugin(PLUGIN_GUID, "FTKModLib", "1.0.0")]
+    [BepInProcess("FTK.exe")]
     public class FTKModLib : BaseUnityPlugin {
         public const string PLUGIN_GUID = "com.FTKModLib.FTKModLib";
-        public const string PLUGIN_NAME = "FTKModLib";
-        public const string PLUGIN_VERSION = "1.0.0";
 
         internal static FTKModLib Instance;
 
@@ -24,7 +23,7 @@ namespace FTKModLib {
             foreach (IManager manager in Managers) {
                 manager.Init();
             }
-
+            
             // This is required for proper serialization for CustomObjects
             // which use an Enum as an identifier.
             // Otherwise, saving and loading games would not work if this

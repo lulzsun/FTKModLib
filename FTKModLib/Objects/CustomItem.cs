@@ -16,11 +16,18 @@ namespace FTKModLib.Objects {
     /// <para>FTKItem          = functionality of item</para>
     /// <para>FTK_weaponStats2 = details of weapon</para>
     /// <para>FTK_items        = details of item</para>
+    /// 
+    /// <para>Weapons attacks/skills are referred to as an 'Proficiency' object,
+    /// this class will simplify them into a WeaponSkill object.</para>
     /// </summary>
-    public class CustomItem : FTKItem {
+    public class CustomItem : ConsumableBase {
         internal string PLUGIN_ORIGIN = "null";
         internal readonly FTK_items itemDetails = new FTK_items();
         internal readonly FTK_weaponStats2 weaponDetails = new FTK_weaponStats2();
+
+        public CustomItem() {
+            weaponDetails.m_NoRegularAttack = true;
+        }
 
         /// <summary>
         /// This is the lookup string for the item, recommended to make this as unique as possible
@@ -126,6 +133,12 @@ namespace FTKModLib.Objects {
                 weaponDetails.m_ObjectType = value;
             }
         }
+        public bool Useable {
+            get => itemDetails._useable;
+            set {
+                itemDetails._useable = value;
+            }
+        }
         public bool IsWeapon {
             get {
                 return ObjectType == FTK_itembase.ObjectType.weapon;
@@ -222,6 +235,11 @@ namespace FTKModLib.Objects {
                 weaponDetails._goldValue = value;
             }
         }
+        /// <summary>
+        /// <para>Prefab of the item.</para>
+        /// <para>If item is a weapon and the prefab is null, it will default to an unarmed prefab.</para>
+        /// <para>Else, it will use a default cube or nothing at all.</para>
+        /// </summary>
         public GameObject Prefab {
             get {
                 if (IsWeapon) {
@@ -240,7 +258,13 @@ namespace FTKModLib.Objects {
         public void ForceUpdatePrefab() {
             if (IsWeapon) {
                 Weapon weapon = Prefab.GetComponentInChildren<Weapon>();
-                weapon.m_ProficiencyEffects = ProficiencyEffects;
+                weapon.m_ProficiencyEffects = new Dictionary<ProficiencyID, HitEffect>();
+                foreach (var prof in ProficiencyEffects) {
+                    weapon.m_ProficiencyEffects.Add(
+                        new ProficiencyID(prof.Key), 
+                        TableManager.Instance.Get<FTK_hitEffectDB>().GetEntry(prof.Value).m_Prefab
+                    );
+                }
                 weapon.m_HitTargetVel = HitTargetVel;
                 weapon.m_WeaponSize = WeaponSize;
                 weapon.m_HitTarget ??= HitTarget;
@@ -275,8 +299,8 @@ namespace FTKModLib.Objects {
                 weaponDetails.m_AttackDisplay = value;
             }
         }
-
         /// <summary>
+        /// <para>This is the default number of rolls for attacks</para>
         /// <para>This cannot be less than one.</para>
         /// </summary>
         public int Slots {
@@ -322,6 +346,9 @@ namespace FTKModLib.Objects {
                 weaponDetails.m_NoFocus = value;
             }
         }
+        /// <summary>
+        /// <para>The weapon's default attack/skill, does raw damage, no effects.</para>
+        /// </summary>
         public bool NoRegularAttack {
             get => weaponDetails.m_NoRegularAttack;
             set {
@@ -329,7 +356,11 @@ namespace FTKModLib.Objects {
             }
         }
         // fields used for Weapon component inside prefab
-        public Dictionary<ProficiencyID, HitEffect> ProficiencyEffects;
+        /// <summary>
+        /// <para>The weapon's attacks/skills, using the vanilla proficiencies</para>
+        /// </summary>
+        public Dictionary<FTK_proficiencyTable.ID, FTK_hitEffect.ID> ProficiencyEffects = new();
+        //public Dictionary<int, int> CustomProficiencyEffects = new();
         public Vector3 HitTargetVel;
         public FTK_ragdollDeath.ID WeaponSize;
         public Transform HitTarget;
@@ -345,7 +376,7 @@ namespace FTKModLib.Objects {
         public Transform BreakRoot;
         public string WeaponHolderName = "WEAPON_HOLDER";
         public GameObject Particles;
-        public WeaponType WeaponType;
+        public WeaponType WeaponType = WeaponType.unarmed;
         public WeaponSubType WeaponSubType;
         public GameObject OffHand;
         public RuntimeAnimatorController AnimationController;

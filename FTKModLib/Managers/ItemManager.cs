@@ -27,6 +27,10 @@ namespace FTKModLib.Managers {
             }
         }
 
+        public void Init() {
+            Console.WriteLine("Initializing " + this.GetType().Name);
+        }
+
         public Dictionary<string, int> enums = new();
         public Dictionary<int, CustomItem> itemsDictionary = new();
         public List<CustomItem> itemsList = new();
@@ -41,10 +45,6 @@ namespace FTKModLib.Managers {
             if (plugin != null) customItem.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
             Instance.itemsList.Add(customItem);
             return true;
-        }
-
-        public void Init() {
-            Console.WriteLine("Initializing " + this.GetType().Name);
         }
     }
 
