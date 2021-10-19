@@ -1,36 +1,19 @@
 ﻿using BepInEx;
 using FTKItemName;
 using FTKModLib.Objects;
-using FTKModLib.Utils;
 using GridEditor;
 using HarmonyLib;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using UnityEngine;
+using Logger = FTKModLib.Utils.Logger;
 
 namespace FTKModLib.Managers {
     /// <summary>
     ///    Manager for handling items added to the game.
     /// </summary>
-    public class ItemManager : IManager {
-        private static ItemManager _instance;
-        /// <summary>
-        ///     The singleton instance of this manager.
-        /// </summary>
-        public static ItemManager Instance {
-            get {
-                if (_instance == null) _instance = new ItemManager();
-                return _instance;
-            }
-        }
-
-        public void Init() {
-            Console.WriteLine("Initializing " + this.GetType().Name);
-        }
-
+    public class ItemManager : BaseManager<ItemManager> {
         public Dictionary<string, int> enums = new();
         public Dictionary<int, CustomItem> itemsDictionary = new();
         public List<CustomItem> itemsList = new();
@@ -65,7 +48,7 @@ namespace FTKModLib.Managers {
                 ItemManager itemManager = ItemManager.Instance;
                 TableManager tableManager = TableManager.Instance;
 
-                Debug.Log("Preparing to load custom items");
+                Logger.LogInfo("Preparing to load custom items");
                 itemManager.itemsDictionary.Clear();
                 itemManager.enums.Clear();
                 itemManager.itemsList.Sort(delegate (CustomItem x, CustomItem y) {
@@ -90,18 +73,18 @@ namespace FTKModLib.Managers {
                             geDataArrayBase.CheckAndMakeIndex();
                         }
                         successfulLoads++;
-                        Debug.Log($"Loaded '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
+                        Logger.LogInfo($"Loaded '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
                     }
                     catch (Exception e) {
-                        Debug.LogError(e);
+                        Logger.LogError(e);
                         brokenItems.Add(item);
-                        Debug.LogError($"Failed to load '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
+                        Logger.LogError($"Failed to load '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
                     }
                 }
                 foreach (CustomItem item in brokenItems) {
                     itemManager.itemsList.Remove(item);
                 }
-                Debug.Log($"Successfully loaded {successfulLoads} out of {itemManager.itemsList.Count} custom items");
+                Logger.LogInfo($"Successfully loaded {successfulLoads} out of {itemManager.itemsList.Count} custom items");
             }
         }
 
@@ -204,16 +187,16 @@ namespace FTKModLib.Managers {
         //[HarmonyPatch(typeof(FTKNetworkObject), "StateDataDeserialize")]
         class FTKNetworkObject_StateDataDeserialize_Patch {
             static void Prefix(string _s, bool _callDone = true) {
-                Debug.LogError("DESERIALIZED:");
-                Debug.LogError(_s);
+                Logger.LogError("DESERIALIZED:");
+                Logger.LogError(_s);
             }
         }
 
         //[HarmonyPatch(typeof(FTKNetworkObject), "StateDataSerialize")]
         class FTKNetworkObject_StateDataSerialize_Patch {
             static void Postfix(ref string __result, bool _prep = true) {
-                Debug.LogError("SERIALIZED:");
-                Debug.LogError(__result);
+                Logger.LogError("SERIALIZED:");
+                Logger.LogError(__result);
             }
         }
     }

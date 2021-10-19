@@ -4,7 +4,6 @@ using FTKModLib.Objects;
 using GridEditor;
 using HarmonyLib;
 using System.Linq;
-using UnityEngine;
 
 namespace FTKModLib.Example {
     [BepInPlugin("com.FTKModLib.Example", "FTKModLib Example Mod", "1.0.0")]
@@ -12,7 +11,7 @@ namespace FTKModLib.Example {
     [BepInProcess("FTK.exe")]
     public class ExampleMod : BaseUnityPlugin {
         private void Awake() {
-            Logger.LogInfo($"Plugin {Info.Metadata.GUID} is loaded!");
+            Utils.Logger.LogInfo($"Plugin {Info.Metadata.GUID} is loaded!");
 
             ItemManager.AddItem(new ExampleItem(), this);
             ItemManager.AddItem(new ExampleWeapon(), this);
@@ -36,11 +35,9 @@ namespace FTKModLib.Example {
             ItemRarity = FTK_itemRarityLevel.ID.rare;
         }
 
-        // makes this "herb" heal for 69
+        // makes this "herb" heal for 69, no pipe buffs
         public override int GetValue(CharacterOverworld _cow) {
-            int heal = 69;
-            FTKUtil.RoundToInt((float)heal * GameFlow.Instance.GameDif.m_HealthGainBonus);
-            return heal;
+            return 69;
         }
 
         // copied from HerbItemBase class
@@ -91,7 +88,7 @@ namespace FTKModLib.Example {
                 );
                 playerGameStartDB.m_Array[(int)FTK_playerGameStart.ID.blacksmith].m_StartWeapon = (FTK_itembase.ID)itemManager.enums["CustomItem2"];
 
-                Debug.Log($"Added CustomItem1 to hunter's m_StartItems");
+                Utils.Logger.LogInfo($"Added CustomItem1 to hunter's m_StartItems");
             }
         }
     }
