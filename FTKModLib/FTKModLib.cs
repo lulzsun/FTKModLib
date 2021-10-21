@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using HarmonyLib;
 using FTKModLib.Managers;
+using GridEditor;
 
 namespace FTKModLib {
     [BepInPlugin(PLUGIN_GUID, "FTKModLib", "1.0.0")]
@@ -23,6 +24,7 @@ namespace FTKModLib {
 
             AssetManager.Instance.Init();
             ItemManager.Instance.Init();
+            ClassManager.Instance.Init();
 
             Harmony harmony = new Harmony(PLUGIN_GUID);
             harmony.PatchAll();
