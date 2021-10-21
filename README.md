@@ -1,4 +1,6 @@
-# FTKModLib - For The King Modding Library  [![Downloads][download-badge]][download-link] [![Discord][discord-badge]][discord-link]
+# FTKModLib - For The King Modding Library
+
+[![Downloads][download-badge]][download-link] [![Discord][discord-badge]][discord-link]
 
 [download-badge]: https://img.shields.io/github/downloads/lulzsun/FTKModLib/total
 [download-link]: https://github.com/lulzsun/FTKModLib/releases/
@@ -23,8 +25,12 @@ There is a provided example plugin(s) made with the use of the library located i
 #### Objects
 - **CustomItem**  
 Can create an item with full custom functionality or inherit functionality from existing items (herbs, orbs, armor, weapons).
+- **CustomClass**  
+Can create a character class with full custom functionality or inherit functionality from existing classes (blacksmith, hunter, etc.).
 
 #### Managers
+- **AssetManager**  
+Allows importing custom assets such as models and images, to be used with custom or existing GameObjects.
 - **ItemManager**  
 Allows the modification and addition of items. As simple as ```ItemManager.AddItem(new CustomItem());``` !
 - **ClassManager**  
