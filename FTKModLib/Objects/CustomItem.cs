@@ -1,10 +1,13 @@
 ﻿using FTKItemName;
+using FTKModLib.Managers;
 using Google2u;
 using GridEditor;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using static Weapon;
+using Logger = FTKModLib.Utils.Logger;
 
 namespace FTKModLib.Objects {
 
@@ -250,6 +253,10 @@ namespace FTKModLib.Objects {
                 return itemDetails.m_Prefab;
             }
             set {
+                if(value == null) {
+                    Logger.LogError("Trying to set a null prefab? Defaulting to unarmed prefab is item is a weapon.");
+                    return;
+                }
                 itemDetails.m_Prefab = value;
                 weaponDetails.m_Prefab = value;
             }
@@ -257,6 +264,16 @@ namespace FTKModLib.Objects {
         public void ForceUpdatePrefab() {
             if (IsWeapon) {
                 Weapon weapon = Prefab.GetComponentInChildren<Weapon>();
+                if(weapon == null) { // if a weapon component doesn't exist, its probably a custom prefab
+                    var mesh = Prefab.transform.Find("root");
+                    if (mesh == null) {
+                        Logger.LogError("Weapon prefab does not contain a child called 'root'!");
+                        throw new Exception();
+                    }
+                    weapon = mesh.gameObject.AddComponent<Weapon>();
+                    Logger.LogInfo($"Added Weapon Script to {Prefab}");
+                }
+
                 weapon.m_ProficiencyEffects = new Dictionary<ProficiencyID, HitEffect>();
                 foreach (var prof in ProficiencyEffects) {
                     weapon.m_ProficiencyEffects.Add(

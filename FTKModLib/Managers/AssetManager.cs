@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +11,18 @@ namespace FTKModLib.Managers {
     ///    Manager for handling assets (models/animations) added to the game.
     /// </summary>
     public class AssetManager : BaseManager<AssetManager> {
+        public static List<Weapon> Weapons;
+
+        public override void Init() {
+            base.Init();
+            Weapons = Resources.LoadAll<Weapon>("").ToList();
+            Resources.UnloadUnusedAssets();
+        }
+
+        public static List<RuntimeAnimatorController> GetAnimationControllers<T>() where T : Weapon {
+            var result = Weapons.Select(o => o.m_AnimationController).ToList();
+            return result;
+        }
         #region
         /* MIT License
 
