@@ -61,8 +61,8 @@ namespace FTKModLib.Managers {
                         FTK_itembase itemDetails = item.itemDetails;
                         itemManager.enums.Add(itemDetails.m_ID,
                             // Anything over 100000? is a weapon, anything under is a regular item.
-                            !item.IsWeapon ? 100000 - itemManager.itemsList.Count :
-                            itemManager.itemsList.Count + (int)Enum.GetValues(typeof(FTK_itembase.ID)).Cast<FTK_itembase.ID>().Max() - brokenItems.Count
+                            !item.IsWeapon ? 100000 - (successfulLoads+1) :
+                            (int)Enum.GetValues(typeof(FTK_itembase.ID)).Cast<FTK_itembase.ID>().Max() + (successfulLoads + 1)
                         );
                         itemManager.itemsDictionary.Add(itemManager.enums[itemDetails.m_ID], item);
                         GEDataArrayBase geDataArrayBase = tableManager.Get(!item.IsWeapon ? typeof(FTK_itemsDB) : typeof(FTK_weaponStats2DB));
