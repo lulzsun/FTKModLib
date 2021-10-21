@@ -11,23 +11,53 @@ using Logger = FTKModLib.Utils.Logger;
 
 namespace FTKModLib.Managers {
     /// <summary>
-    ///    Manager for handling items added to the game.
+    ///    Manager for handling items in the game.
     /// </summary>
     public class ItemManager : BaseManager<ItemManager> {
         public Dictionary<string, int> enums = new();
         public Dictionary<int, CustomItem> itemsDictionary = new();
         public List<CustomItem> itemsList = new();
 
+        private static int successfulLoads = 0;
+
         /// <summary>
         /// Add a custom item.
         /// </summary>
         /// <param name="customItem">The custom item to be added.</param>
         /// <param name="plugin">Allows FTKModLib to know which plugin called this method. Not required but recommended to make debugging easier.</param>
-        /// <returns></returns>
-        public static bool AddItem(CustomItem customItem, BaseUnityPlugin plugin = null) {
+        /// <returns>Returns FTK_itembase.ID enum as int</returns>
+        public static int AddItem(CustomItem customItem, BaseUnityPlugin plugin = null) {
             if (plugin != null) customItem.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
             Instance.itemsList.Add(customItem);
-            return true;
+
+            ItemManager itemManager = ItemManager.Instance;
+            TableManager tableManager = TableManager.Instance;
+
+            try {
+                customItem.ForceUpdatePrefab(); // this is necessary to apply Weapon fields
+                FTK_itembase itemDetails = customItem.itemDetails;
+                itemManager.enums.Add(itemDetails.m_ID,
+                    // Anything over 100000? is a weapon, anything under is a regular item.
+                    !customItem.IsWeapon ? 100000 - (successfulLoads + 1) :
+                    (int)Enum.GetValues(typeof(FTK_itembase.ID)).Cast<FTK_itembase.ID>().Max() + (successfulLoads + 1)
+                );
+                itemManager.itemsDictionary.Add(itemManager.enums[itemDetails.m_ID], customItem);
+                GEDataArrayBase geDataArrayBase = tableManager.Get(!customItem.IsWeapon ? typeof(FTK_itemsDB) : typeof(FTK_weaponStats2DB));
+                if (!geDataArrayBase.IsContainID(itemDetails.m_ID)) {
+                    geDataArrayBase.AddEntry(itemDetails.m_ID);
+                    if (!customItem.IsWeapon) ((FTK_itemsDB)geDataArrayBase).m_Array[tableManager.Get<FTK_itemsDB>().m_Array.Length - 1] = (FTK_items)itemDetails;
+                    else ((FTK_weaponStats2DB)geDataArrayBase).m_Array[tableManager.Get<FTK_weaponStats2DB>().m_Array.Length - 1] = customItem.weaponDetails;
+                    geDataArrayBase.CheckAndMakeIndex();
+                }
+                successfulLoads++;
+                Logger.LogInfo($"Loaded '{customItem.ID}' of type '{customItem.ObjectType}' from {customItem.PLUGIN_ORIGIN}");
+                return itemManager.enums[customItem.ID];
+            }
+            catch (Exception e) {
+                Logger.LogError(e);
+                Logger.LogError($"Failed to load '{customItem.ID}' of type '{customItem.ObjectType}' from {customItem.PLUGIN_ORIGIN}");
+                return -1;
+            }
         }
 
         /// <summary>
@@ -36,57 +66,6 @@ namespace FTKModLib.Managers {
         ///    by substituting with 'ItemManager.enums' dictionary value.</para>
         /// </summary>
         class HarmonyPatches {
-            [HarmonyPatch(typeof(TableManager), "Initialize")]
-            class TableManager_Initialize_Patch {
-                /// <summary>
-                /// FTK_itemDB injection point
-                /// </summary>
-                static void Postfix() {
-                    // LOAD CUSTOM ITEMS
-                    int successfulLoads = 0;
-                    ItemManager itemManager = ItemManager.Instance;
-                    TableManager tableManager = TableManager.Instance;
-
-                    Logger.LogInfo("Preparing to load custom items");
-                    itemManager.itemsDictionary.Clear();
-                    itemManager.enums.Clear();
-                    itemManager.itemsList.Sort(delegate (CustomItem x, CustomItem y) {
-                        return x.ID.CompareTo(y.ID);
-                    });//will keep Enums in sync?
-                    List<CustomItem> brokenItems = new();
-                    foreach (CustomItem item in itemManager.itemsList) {
-                        try {
-                            item.ForceUpdatePrefab(); // this is necessary to apply Weapon fields
-                            FTK_itembase itemDetails = item.itemDetails;
-                            itemManager.enums.Add(itemDetails.m_ID,
-                                // Anything over 100000? is a weapon, anything under is a regular item.
-                                !item.IsWeapon ? 100000 - (successfulLoads + 1) :
-                                (int)Enum.GetValues(typeof(FTK_itembase.ID)).Cast<FTK_itembase.ID>().Max() + (successfulLoads + 1)
-                            );
-                            itemManager.itemsDictionary.Add(itemManager.enums[itemDetails.m_ID], item);
-                            GEDataArrayBase geDataArrayBase = tableManager.Get(!item.IsWeapon ? typeof(FTK_itemsDB) : typeof(FTK_weaponStats2DB));
-                            if (!geDataArrayBase.IsContainID(itemDetails.m_ID)) {
-                                geDataArrayBase.AddEntry(itemDetails.m_ID);
-                                if (!item.IsWeapon) ((FTK_itemsDB)geDataArrayBase).m_Array[tableManager.Get<FTK_itemsDB>().m_Array.Length - 1] = (FTK_items)itemDetails;
-                                else ((FTK_weaponStats2DB)geDataArrayBase).m_Array[tableManager.Get<FTK_weaponStats2DB>().m_Array.Length - 1] = item.weaponDetails;
-                                geDataArrayBase.CheckAndMakeIndex();
-                            }
-                            successfulLoads++;
-                            Logger.LogInfo($"Loaded '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
-                        }
-                        catch (Exception e) {
-                            Logger.LogError(e);
-                            brokenItems.Add(item);
-                            Logger.LogError($"Failed to load '{item.ID}' of type '{item.ObjectType}' from {item.PLUGIN_ORIGIN}");
-                        }
-                    }
-                    foreach (CustomItem item in brokenItems) {
-                        itemManager.itemsList.Remove(item);
-                    }
-                    Logger.LogInfo($"Successfully loaded {successfulLoads} out of {itemManager.itemsList.Count} custom items");
-                }
-            }
-
             [HarmonyPatch(typeof(FTK_itembase), "GetItemBase")]
             class FTK_itembase_GetItemBase_Patch {
                 static bool Prefix(ref FTK_itembase __result, FTK_itembase.ID _id) {

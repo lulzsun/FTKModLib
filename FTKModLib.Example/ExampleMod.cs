@@ -20,14 +20,6 @@ namespace FTKModLib.Example {
             Utils.Logger.LogInfo($"Plugin {Info.Metadata.GUID} is loaded!");
             assetBundle = AssetManager.LoadAssetBundleFromResources("customitemsbundle", Assembly.GetExecutingAssembly());
 
-            foreach (var animator in AssetManager.GetAnimationControllers<Weapon>()) {
-                if (animator.name.StartsWith("player_")) Utils.Logger.LogInfo(animator.name);
-            }
-
-            ItemManager.AddItem(new ExampleHerb(), Instance);
-            ItemManager.AddItem(new ExampleBlade(), Instance);
-            ItemManager.AddItem(new ExampleGun(), Instance);
-
             Harmony harmony = new Harmony(Info.Metadata.GUID);
             harmony.PatchAll();
         }
@@ -36,14 +28,18 @@ namespace FTKModLib.Example {
             [HarmonyPatch(typeof(TableManager), "Initialize")]
             class TableManager_Initialize_Patch {
                 static void Postfix() {
+                    int customHerb = ItemManager.AddItem(new ExampleHerb(), Instance);
+                    int customBlade = ItemManager.AddItem(new ExampleBlade(), Instance);
+                    int customGun = ItemManager.AddItem(new ExampleGun(), Instance);
+
                     ClassManager.ModifyClass(
                         FTK_playerGameStart.ID.blacksmith,
                         new CustomClass(FTK_playerGameStart.ID.blacksmith) {
-                            StartWeapon = (FTK_itembase.ID)ItemManager.Instance.enums["CustomBlade1"]
+                            StartWeapon = (FTK_itembase.ID)customBlade
                         }
                         .AddToStartItems(new FTK_itembase.ID[] {
-                            (FTK_itembase.ID)ItemManager.Instance.enums["CustomHerb1"],
-                            (FTK_itembase.ID)ItemManager.Instance.enums["CustomGun1"]
+                            (FTK_itembase.ID)customHerb,
+                            (FTK_itembase.ID)customGun
                         })
                     );
                     Utils.Logger.LogInfo($"Modified blacksmith class to give our example items");
