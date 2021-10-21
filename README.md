@@ -1,4 +1,10 @@
-# FTKModLib - For The King Modding Library
+# FTKModLib - For The King Modding Library  [![Downloads][download-badge]][download-link] [![Discord][discord-badge]][discord-link]
+
+[download-badge]: https://img.shields.io/github/downloads/lulzsun/FTKModLib/total
+[download-link]: https://github.com/lulzsun/FTKModLib/releases/
+
+[discord-badge]: https://img.shields.io/discord/900685481858183178?label=discord&logo=discord
+[discord-link]: https://discord.gg/FqhEBfZaC8
 FTKModLib is a work-in-progress modding framework to aid developers in creating For The King mods, by providing centralized and simplified APIs for the game.
 
 ## Installation
