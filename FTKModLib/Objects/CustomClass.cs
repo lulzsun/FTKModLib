@@ -7,12 +7,12 @@ using Logger = FTKModLib.Utils.Logger;
 
 namespace FTKModLib.Objects {
     public class CustomClass : FTK_playerGameStart {
-        public CustomClass(ID baseClass = ID.None) {
-            if (baseClass != ID.None) {
-                var source = ClassManager.GetClass(baseClass);
-                foreach (FieldInfo field in typeof(FTK_playerGameStart).GetFields()) {
-                    field.SetValue(this, field.GetValue(source));
-                }
+        internal string PLUGIN_ORIGIN = "null";
+
+        public CustomClass(ID baseClass = FTK_playerGameStart.ID.blacksmith) {
+            var source = ClassManager.GetClass(baseClass);
+            foreach (FieldInfo field in typeof(FTK_playerGameStart).GetFields()) {
+                field.SetValue(this, field.GetValue(source));
             }
         }
 
@@ -26,6 +26,14 @@ namespace FTKModLib.Objects {
             }
             StartItems = StartItems.Concat(newStartItems).ToArray();
             return this;
+        }
+
+        /// <summary>
+        /// This is the lookup string for the class, recommended to make this as unique as possible
+        /// </summary>
+        public new string ID {
+            get => this.m_ID;
+            set => this.m_ID = value;
         }
 
         public string DisplayName {

@@ -22,6 +22,7 @@ namespace FTKModLib.Managers {
 
         /// <summary>
         /// Add a custom item.
+        /// <para>Must be called in a TableManager.Initialize postfix patch.</para>
         /// </summary>
         /// <param name="customItem">The custom item to be added.</param>
         /// <param name="plugin">Allows FTKModLib to know which plugin called this method. Not required but recommended to make debugging easier.</param>

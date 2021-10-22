@@ -25,6 +25,10 @@ namespace FTKModLib.Example {
         }
 
         class HarmonyPatches {
+            /// <summary>
+            /// Most calls to managers will most likely require to be called after TableManager.Initialize.
+            /// So just make all your changes in this postfix patch unless you know what you're doing.
+            /// </summary>
             [HarmonyPatch(typeof(TableManager), "Initialize")]
             class TableManager_Initialize_Patch {
                 static void Postfix() {
@@ -32,6 +36,9 @@ namespace FTKModLib.Example {
                     int customBlade = ItemManager.AddItem(new ExampleBlade(), Instance);
                     int customGun = ItemManager.AddItem(new ExampleGun(), Instance);
 
+                    ClassManager.AddClass(new ExampleClass() { 
+                        StartWeapon = (FTK_itembase.ID)customGun 
+                    }, Instance);
                     ClassManager.ModifyClass(
                         FTK_playerGameStart.ID.blacksmith,
                         new CustomClass(FTK_playerGameStart.ID.blacksmith) {

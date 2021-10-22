@@ -27,6 +27,8 @@ There is a provided example plugin(s) made with the use of the library located i
 Can create an item with full custom functionality or inherit functionality from existing items (herbs, orbs, armor, weapons).
 - **CustomClass**  
 Can create a character class with full custom functionality or inherit functionality from existing classes (blacksmith, hunter, etc.).
+- **CustomLocalizedString**  
+Can create a string/text that supports additional languages.
 
 #### Managers
 - **AssetManager**  
