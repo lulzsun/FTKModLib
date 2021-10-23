@@ -5,16 +5,17 @@ namespace FTKModLib.Example {
     public class ExampleClass : CustomClass {
         public ExampleClass() {
             ID = "CustomClass";
-            Name = new CustomLocalizedString("Gunslinger");
-            Description = new CustomLocalizedString("He's a good shot... but bad at everything else.");
-            //StartWeapon = (FTK_itembase.ID)customGun;
-            Strength = 0f;
-            Vitality = 0f;
-            Intelligence = 0f;
-            Awareness = 0.9f;
-            Talent = 0.9f;
-            Speed = 0f;
-            Luck = 0f;
+            Name = new CustomLocalizedString("Leprechaun");
+            Description = new CustomLocalizedString("He's a lucky fellow. Also carries around lots of gold.");
+            StartingGold = 40;
+            StartWeapon = FTK_itembase.ID.bluntToyHammer;
+            Strength = 0.4f;
+            Vitality = 0.5f;
+            Intelligence = 0.4f;
+            Awareness = 0.4f;
+            Talent = 0.6f;
+            Speed = 0.7f;
+            Luck = 0.7f;
         }
     }
 }

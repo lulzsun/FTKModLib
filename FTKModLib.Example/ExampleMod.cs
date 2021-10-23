@@ -36,9 +36,7 @@ namespace FTKModLib.Example {
                     int customBlade = ItemManager.AddItem(new ExampleBlade(), Instance);
                     int customGun = ItemManager.AddItem(new ExampleGun(), Instance);
 
-                    ClassManager.AddClass(new ExampleClass() { 
-                        StartWeapon = (FTK_itembase.ID)customGun 
-                    }, Instance);
+                    ClassManager.AddClass(new ExampleClass(), Instance);
                     ClassManager.ModifyClass(
                         FTK_playerGameStart.ID.blacksmith,
                         new CustomClass(FTK_playerGameStart.ID.blacksmith) {
