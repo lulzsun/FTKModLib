@@ -17,7 +17,6 @@ namespace FTKModLib.Managers {
         public Dictionary<string, int> enums = new();
         public Dictionary<int, CustomClass> customDictionary = new();
         public Dictionary<int, CustomClass> moddedDictionary = new();
-        public List<CustomClass> customList = new();
 
         /// <summary>
         /// Gets a class from TableManager's FTK_playerGameStartDB
