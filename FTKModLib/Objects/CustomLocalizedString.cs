@@ -1,4 +1,8 @@
-﻿namespace FTKModLib.Objects {
+﻿using Google2u;
+using System;
+using UnityEngine;
+
+namespace FTKModLib.Objects {
     public class CustomLocalizedString {
         public string _en; public string _fr; public string _it;
         public string _de; public string _es; public string _pt_br;
@@ -28,5 +32,29 @@
             _zh_tw = __zh_tw; _pl = __pl; _ja = __ja;
         }
 
+        public string GetLocalizedString() {
+            FTKHub.LanguageCode m_Language = FTKHub.LanguageCode._en;
+
+            var textMiscRow = new TextMiscRow(
+                "",
+                this._en, this._fr, this._it,
+                this._de, this._es, this._pt_br,
+                this._ru, this._zh_cn, this._zh_tw,
+                this._pl, this._ja, this._ko
+            );
+
+            string value = PlayerPrefs.GetString("Language");
+            if (!string.IsNullOrEmpty(value)) {
+                try {
+                    m_Language = (FTKHub.LanguageCode)Enum.Parse(typeof(FTKHub.LanguageCode), value);
+                }
+                catch (ArgumentException) {
+                    Debug.Log("Incorrect Language code");
+                }
+            }
+
+            string langCode = m_Language.ToString().Substring(1);
+            return textMiscRow.GetStringData(langCode.Replace("_", "-"));
+        }
     }
 }

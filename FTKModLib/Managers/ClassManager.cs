@@ -5,7 +5,6 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Logger = FTKModLib.Utils.Logger;
 
 /// <summary>
@@ -56,12 +55,12 @@ namespace FTKModLib.Managers {
                     geDataArrayBase.CheckAndMakeIndex();
                 }
                 successfulLoads++;
-                Logger.LogInfo($"Loaded '{customClass.ID}' of name '{customClass.DisplayName}' from {customClass.PLUGIN_ORIGIN}");
+                Logger.LogInfo($"Loaded '{customClass.ID}' of name '{customClass.Name}' from {customClass.PLUGIN_ORIGIN}");
                 return classManager.enums[customClass.m_ID];
             }
             catch (Exception e) {
                 Logger.LogError(e);
-                Logger.LogError($"Failed to load '{customClass.ID}' of name '{customClass.DisplayName}' from {customClass.PLUGIN_ORIGIN}");
+                Logger.LogError($"Failed to load '{customClass.ID}' of name '{customClass.Name}' from {customClass.PLUGIN_ORIGIN}");
                 return -1;
             }
         }

@@ -3,7 +3,6 @@ using Google2u;
 using GridEditor;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 using static Weapon;
 using Logger = FTKModLib.Utils.Logger;
@@ -40,7 +39,6 @@ namespace FTKModLib.Objects {
                 weaponDetails.m_ID = value;
             }
         }
-        private TextItemsRow textItemsRow;
         private CustomLocalizedString name;
         /// <summary>
         /// This is the item's ingame display name, supports localized language
@@ -48,24 +46,15 @@ namespace FTKModLib.Objects {
         public CustomLocalizedString Name {
             get => name;
             set {
-                textItemsRow = new TextItemsRow(
-                    ID,
-                    value._en, value._fr, value._it,
-                    value._de, value._es, value._pt_br,
-                    value._ru, value._zh_cn, value._zh_tw,
-                    value._pl, value._ja, value._ko
-                );
                 name = value;
             }
         }
         public string GetName() {
-            if (textItemsRow == null) {
+            if (name == null) {
                 return ID;
             }
-            MethodInfo private_LocalizeRelease = typeof(FTKHub).GetMethod("LocalizeRelease", BindingFlags.NonPublic | BindingFlags.Static);
-            return (string)private_LocalizeRelease.Invoke(private_LocalizeRelease, new object[] { textItemsRow });
+            return name.GetLocalizedString();
         }
-        private TextItemsDescriptionRow textItemsDescriptionRow;
         private CustomLocalizedString description;
         /// <summary>
         /// <para>This is the item's ingame description, supports localized language</para>
@@ -74,13 +63,6 @@ namespace FTKModLib.Objects {
         public CustomLocalizedString Description {
             get => description;
             set {
-                textItemsDescriptionRow = new TextItemsDescriptionRow(
-                    ID,
-                    value._en, value._fr, value._it,
-                    value._de, value._es, value._pt_br,
-                    value._ru, value._zh_cn, value._zh_tw,
-                    value._pl, value._ja, value._ko
-                );
                 description = value;
             }
         }
@@ -88,11 +70,10 @@ namespace FTKModLib.Objects {
             if (!string.IsNullOrEmpty(this.GetCannotUseReason(_cow))) {
                 return this.GetCannotUseReason(_cow);
             }
-            if(textItemsDescriptionRow == null) {
+            if(description == null) {
                 return "This custom item is missing a description!";
             }
-            MethodInfo private_LocalizeRelease = typeof(FTKHub).GetMethod("LocalizeRelease", BindingFlags.NonPublic | BindingFlags.Static);
-            string format = (string)private_LocalizeRelease.Invoke(private_LocalizeRelease, new object[] { textItemsDescriptionRow });
+            string format = description.GetLocalizedString();
             int num = this.GetValue(_cow);
             if (num < 0 && this.DisplayPositiveValue()) {
                 num *= -1;

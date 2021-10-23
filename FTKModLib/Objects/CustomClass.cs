@@ -1,5 +1,6 @@
 ﻿using FTKModLib.Managers;
 using FTKModLib.Utils;
+using Google2u;
 using GridEditor;
 using System.Linq;
 using System.Reflection;
@@ -35,10 +36,21 @@ namespace FTKModLib.Objects {
             get => this.m_ID;
             set => this.m_ID = value;
         }
-
-        public string DisplayName {
-            get => this.m_DisplayName;
-            set => this.m_DisplayName = value;
+        private CustomLocalizedString name;
+        public CustomLocalizedString Name {
+            get => name;
+            set {
+                name = value;
+                this.m_DisplayName = name.GetLocalizedString();
+            }
+        }
+        private CustomLocalizedString description;
+        public CustomLocalizedString Description {
+            get => description;
+            set {
+                description = value;
+                this.m_Flavor = description.GetLocalizedString();
+            }
         }
         public FTK_dlc.ID DLC {
             get => this.m_DLC;
@@ -119,10 +131,6 @@ namespace FTKModLib.Objects {
         public SkinType DefaultSkinType {
             get => this.m_DefaultSkinType;
             set => this.m_DefaultSkinType = value;
-        }
-        public string Flavor {
-            get => this.m_Flavor;
-            set => this.m_Flavor = value;
         }
     }
 }

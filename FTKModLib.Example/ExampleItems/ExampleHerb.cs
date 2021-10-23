@@ -18,6 +18,11 @@ namespace FTKModLib.Example {
             ItemRarity = FTK_itemRarityLevel.ID.rare;
         }
 
+        // makes this "herb" heal for 69, no pipe buffs
+        public override int GetValue(CharacterOverworld _cow) {
+            return healValue;
+        }
+
         // copied from HerbItemBase class
         // will allow this item to be used anywhere a herb can be used
         public override bool CanUse(CharacterOverworld _cow, bool _voteButton = false) {
@@ -27,7 +32,7 @@ namespace FTKModLib.Example {
         // copied from herbGodsbeard1
         public override void OnUse(CharacterOverworld _cow, PlayerInventory.ContainerID _containerID) {
             base.OnUse(_cow, _containerID);
-            _cow.m_CharacterStats.GainSpecificHealth(healValue, true, true);
+            _cow.m_CharacterStats.GainSpecificHealth(GetValue(_cow), true, true);
             this.UsingFinished(true, false, false);
         }
     }
