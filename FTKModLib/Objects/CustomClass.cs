@@ -1,10 +1,7 @@
 ﻿using FTKModLib.Managers;
-using FTKModLib.Utils;
-using Google2u;
 using GridEditor;
 using System.Linq;
 using System.Reflection;
-using Logger = FTKModLib.Utils.Logger;
 
 namespace FTKModLib.Objects {
     public class CustomClass : FTK_playerGameStart {
@@ -92,9 +89,17 @@ namespace FTKModLib.Objects {
             get => this.m_PublicTest;
             set => this.m_PublicTest = value;
         }
+        public float Strength {
+            get => this._toughness;
+            set => this._toughness = value;
+        }
         public float Vitality {
             get => this._vitality;
             set => this._vitality = value;
+        }
+        public float Intelligence {
+            get => this._fortitude;
+            set => this._fortitude = value;
         }
         public float Talent {
             get => this._talent;
@@ -104,17 +109,18 @@ namespace FTKModLib.Objects {
             get => this._awareness;
             set => this._awareness = value;
         }
-        public float Fortitude {
-            get => this._fortitude;
-            set => this._fortitude = value;
-        }
-        public float Toughness {
-            get => this._toughness;
-            set => this._toughness = value;
-        }
-        public float Quickness {
+        public float Speed {
             get => this._quickness;
             set => this._quickness = value;
+        }
+        private float luck = -1f;
+        /// <summary>
+        /// <para>Luck cannot be lower than 0f</para>
+        /// <para>Note: Luck is actually a hidden stat until your character spawns (i.e, it won't show up in character info)</para>
+        /// </summary>
+        public float Luck {
+            get => this.luck;
+            set => this.luck = value;
         }
         public FTK_weaponStats2.SkillType PrimaryWeaponStat {
             get => this.m_PrimaryWeaponStat;

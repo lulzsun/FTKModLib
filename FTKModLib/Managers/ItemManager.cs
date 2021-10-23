@@ -14,11 +14,10 @@ namespace FTKModLib.Managers {
     ///    Manager for handling items in the game.
     /// </summary>
     public class ItemManager : BaseManager<ItemManager> {
+        public int successfulLoads = 0;
         public Dictionary<string, int> enums = new();
-        public Dictionary<int, CustomItem> itemsDictionary = new();
-        public List<CustomItem> itemsList = new();
-
-        private static int successfulLoads = 0;
+        public Dictionary<int, CustomItem> customDictionary = new();
+        public Dictionary<int, CustomItem> moddedDictionary = new();
 
         /// <summary>
         /// Add a custom item.
@@ -29,7 +28,6 @@ namespace FTKModLib.Managers {
         /// <returns>Returns FTK_itembase.ID enum as int</returns>
         public static int AddItem(CustomItem customItem, BaseUnityPlugin plugin = null) {
             if (plugin != null) customItem.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
-            Instance.itemsList.Add(customItem);
 
             ItemManager itemManager = ItemManager.Instance;
             TableManager tableManager = TableManager.Instance;
@@ -39,10 +37,10 @@ namespace FTKModLib.Managers {
                 FTK_itembase itemDetails = customItem.itemDetails;
                 itemManager.enums.Add(itemDetails.m_ID,
                     // Anything over 100000? is a weapon, anything under is a regular item.
-                    !customItem.IsWeapon ? 100000 - (successfulLoads + 1) :
-                    (int)Enum.GetValues(typeof(FTK_itembase.ID)).Cast<FTK_itembase.ID>().Max() + (successfulLoads + 1)
+                    !customItem.IsWeapon ? 100000 - (itemManager.successfulLoads + 1) :
+                    (int)Enum.GetValues(typeof(FTK_itembase.ID)).Cast<FTK_itembase.ID>().Max() + (itemManager.successfulLoads + 1)
                 );
-                itemManager.itemsDictionary.Add(itemManager.enums[itemDetails.m_ID], customItem);
+                itemManager.customDictionary.Add(itemManager.enums[itemDetails.m_ID], customItem);
                 GEDataArrayBase geDataArrayBase = tableManager.Get(!customItem.IsWeapon ? typeof(FTK_itemsDB) : typeof(FTK_weaponStats2DB));
                 if (!geDataArrayBase.IsContainID(itemDetails.m_ID)) {
                     geDataArrayBase.AddEntry(itemDetails.m_ID);
@@ -50,7 +48,20 @@ namespace FTKModLib.Managers {
                     else ((FTK_weaponStats2DB)geDataArrayBase).m_Array[tableManager.Get<FTK_weaponStats2DB>().m_Array.Length - 1] = customItem.weaponDetails;
                     geDataArrayBase.CheckAndMakeIndex();
                 }
-                successfulLoads++;
+
+                // sometimes the object does not get added into the dictionary if initialize was called more than once, this ensures it does
+                if (!customItem.IsWeapon) {
+                    if (!((FTK_itemsDB)geDataArrayBase).m_Dictionary.ContainsKey(tableManager.Get<FTK_itemsDB>().m_Array.Length - 1)) {
+                        ((FTK_itemsDB)geDataArrayBase).m_Dictionary.Add(tableManager.Get<FTK_itemsDB>().m_Array.Length - 1, (FTK_items)itemDetails);
+                    }
+                }
+                else {
+                    if (!((FTK_weaponStats2DB)geDataArrayBase).m_Dictionary.ContainsKey(tableManager.Get<FTK_weaponStats2DB>().m_Array.Length - 1)) {
+                        ((FTK_weaponStats2DB)geDataArrayBase).m_Dictionary.Add(tableManager.Get<FTK_weaponStats2DB>().m_Array.Length - 1, customItem.weaponDetails);
+                    }
+                }
+
+                itemManager.successfulLoads++;
                 Logger.LogInfo($"Loaded '{customItem.ID}' of type '{customItem.ObjectType}' from {customItem.PLUGIN_ORIGIN}");
                 return itemManager.enums[customItem.ID];
             }
@@ -67,10 +78,21 @@ namespace FTKModLib.Managers {
         ///    by substituting with 'ItemManager.enums' dictionary value.</para>
         /// </summary>
         class HarmonyPatches {
+            [HarmonyPatch(typeof(TableManager), "Initialize")]
+            class TableManager_Initialize_Patch {
+                static void Prefix() {
+                    Logger.LogInfo("Preparing to load custom items");
+                    ItemManager.Instance.successfulLoads = 0;
+                    ItemManager.Instance.enums.Clear();
+                    ItemManager.Instance.customDictionary.Clear();
+                    ItemManager.Instance.moddedDictionary.Clear();
+                }
+            }
+
             [HarmonyPatch(typeof(FTK_itembase), "GetItemBase")]
             class FTK_itembase_GetItemBase_Patch {
                 static bool Prefix(ref FTK_itembase __result, FTK_itembase.ID _id) {
-                    if (ItemManager.Instance.itemsDictionary.TryGetValue((int)_id, out CustomItem customItem)) {
+                    if (ItemManager.Instance.customDictionary.TryGetValue((int)_id, out CustomItem customItem)) {
                         if (!customItem.IsWeapon)
                             __result = customItem.itemDetails;
                         else
@@ -85,7 +107,7 @@ namespace FTKModLib.Managers {
             class FTK_itembase_GetLocalizedName_Patch {
                 static bool Prefix(ref string __result, FTK_itembase __instance) {
                     if (ItemManager.Instance.enums.TryGetValue(__instance.m_ID, out int dictKey)) {
-                        __result = ItemManager.Instance.itemsDictionary[dictKey].GetName();
+                        __result = ItemManager.Instance.customDictionary[dictKey].GetName();
                         return false;
                     }
                     return true;
@@ -95,7 +117,7 @@ namespace FTKModLib.Managers {
             [HarmonyPatch(typeof(FTKItem), "Get")]
             class FTKItem_Get_Patch {
                 static bool Prefix(ref FTKItem __result, FTK_itembase.ID _id) {
-                    if (ItemManager.Instance.itemsDictionary.TryGetValue((int)_id, out CustomItem customItem)) {
+                    if (ItemManager.Instance.customDictionary.TryGetValue((int)_id, out CustomItem customItem)) {
                         FieldInfo private_gItemDictionary = typeof(FTKItem).GetField("gItemDictionary", BindingFlags.NonPublic | BindingFlags.Static);
 
                         if ((Dictionary<FTK_itembase.ID, FTKItem>)private_gItemDictionary.GetValue(private_gItemDictionary) == null) {
@@ -125,7 +147,7 @@ namespace FTKModLib.Managers {
             [HarmonyPatch(typeof(FTK_weaponStats2DB), "GetEntry")]
             class FTK_weaponStats2DB_GetEntry_Patch {
                 static bool Prefix(ref FTK_weaponStats2 __result, FTK_itembase.ID _enumID) {
-                    if (ItemManager.Instance.itemsDictionary.TryGetValue((int)_enumID, out CustomItem customItem)) {
+                    if (ItemManager.Instance.customDictionary.TryGetValue((int)_enumID, out CustomItem customItem)) {
                         __result = customItem.weaponDetails;
                         return false;
                     }

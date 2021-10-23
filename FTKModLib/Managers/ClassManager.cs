@@ -5,6 +5,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Logger = FTKModLib.Utils.Logger;
 
 /// <summary>
@@ -12,11 +13,11 @@ using Logger = FTKModLib.Utils.Logger;
 /// </summary>
 namespace FTKModLib.Managers {
     public class ClassManager : BaseManager<ClassManager> {
+        public int successfulLoads = 0;
         public Dictionary<string, int> enums = new();
-        public Dictionary<int, CustomClass> classesDictionary = new();
-        public List<CustomClass> classesList = new();
-
-        private static int successfulLoads = 0;
+        public Dictionary<int, CustomClass> customDictionary = new();
+        public Dictionary<int, CustomClass> moddedDictionary = new();
+        public List<CustomClass> customList = new();
 
         /// <summary>
         /// Gets a class from TableManager's FTK_playerGameStartDB
@@ -38,23 +39,28 @@ namespace FTKModLib.Managers {
         /// <returns>Returns FTK_playerGameStart.ID enum as int</returns>
         public static int AddClass(CustomClass customClass, BaseUnityPlugin plugin = null) {
             if (plugin != null) customClass.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
-            Instance.classesList.Add(customClass);
 
             ClassManager classManager = ClassManager.Instance;
             TableManager tableManager = TableManager.Instance;
 
             try {
                 classManager.enums.Add(customClass.m_ID,
-                    (int)Enum.GetValues(typeof(FTK_playerGameStart.ID)).Cast<FTK_playerGameStart.ID>().Max() + (successfulLoads + 1)
+                    (int)Enum.GetValues(typeof(FTK_playerGameStart.ID)).Cast<FTK_playerGameStart.ID>().Max() + (classManager.successfulLoads + 1)
                 );
-                classManager.classesDictionary.Add(classManager.enums[customClass.m_ID], customClass);
+                classManager.customDictionary.Add(classManager.enums[customClass.m_ID], customClass);
                 GEDataArrayBase geDataArrayBase = tableManager.Get(typeof(FTK_playerGameStartDB));
                 if (!geDataArrayBase.IsContainID(customClass.m_ID)) {
                     geDataArrayBase.AddEntry(customClass.m_ID);
                     ((FTK_playerGameStartDB)geDataArrayBase).m_Array[tableManager.Get<FTK_playerGameStartDB>().m_Array.Length - 1] = customClass;
                     geDataArrayBase.CheckAndMakeIndex();
                 }
-                successfulLoads++;
+
+                // sometimes the object does not get added into the dictionary if initialize was called more than once, this ensures it does
+                if (!((FTK_playerGameStartDB)geDataArrayBase).m_Dictionary.ContainsKey(tableManager.Get<FTK_playerGameStartDB>().m_Array.Length - 1)) {
+                    ((FTK_playerGameStartDB)geDataArrayBase).m_Dictionary.Add(tableManager.Get<FTK_playerGameStartDB>().m_Array.Length - 1, customClass);
+                }
+
+                classManager.successfulLoads++;
                 Logger.LogInfo($"Loaded '{customClass.ID}' of name '{customClass.Name}' from {customClass.PLUGIN_ORIGIN}");
                 return classManager.enums[customClass.m_ID];
             }
@@ -75,6 +81,7 @@ namespace FTKModLib.Managers {
         public static void ModifyClass(FTK_playerGameStart.ID id, CustomClass customClass) {
             FTK_playerGameStartDB playerClassesDB = TableManager.Instance.Get<FTK_playerGameStartDB>();
             playerClassesDB.m_Array[(int)id] = customClass;
+            ClassManager.Instance.moddedDictionary.Add((int)id, customClass);
         }
 
         /// <summary>
@@ -83,10 +90,21 @@ namespace FTKModLib.Managers {
         ///    by substituting with 'ClassManager.enums' dictionary value.</para>
         /// </summary>
         class HarmonyPatches {
+            [HarmonyPatch(typeof(TableManager), "Initialize")]
+            class TableManager_Initialize_Patch {
+                static void Prefix() {
+                    Logger.LogInfo("Preparing to load custom classes");
+                    ClassManager.Instance.successfulLoads = 0;
+                    ClassManager.Instance.enums.Clear();
+                    ClassManager.Instance.customDictionary.Clear();
+                    ClassManager.Instance.moddedDictionary.Clear();
+                }
+            }
+
             [HarmonyPatch(typeof(FTK_playerGameStartDB), "GetEntry")]
             class FTK_playerGameStartDB_GetEntry_Patch {
                 static bool Prefix(ref FTK_playerGameStart __result, FTK_playerGameStart.ID _enumID) {
-                    if (ClassManager.Instance.classesDictionary.TryGetValue((int)_enumID, out CustomClass customClass)) {
+                    if (ClassManager.Instance.customDictionary.TryGetValue((int)_enumID, out CustomClass customClass)) {
                         __result = customClass;
                         return false;
                     }
@@ -100,6 +118,25 @@ namespace FTKModLib.Managers {
                     //Attempts to return our enum and calls the original function if it errors.
                     if (ClassManager.Instance.enums.ContainsKey(_id)) {
                         __result = ClassManager.Instance.enums[_id];
+                        return false;
+                    }
+                    return true;
+                }
+            }
+
+            [HarmonyPatch(typeof(CharacterStats), "get_RawLuck")]
+            class CharacterStats_get_RawLuck_Patch {
+                public static bool Prefix(ref float __result, CharacterStats __instance) {
+                    var id = (int)__instance.m_CharacterClass;
+                    Dictionary<int, CustomClass> dict = new();
+                    if (ClassManager.Instance.customDictionary.ContainsKey(id)) dict = ClassManager.Instance.customDictionary;
+                    else if (ClassManager.Instance.moddedDictionary.ContainsKey(id)) dict = ClassManager.Instance.moddedDictionary;
+
+                    if (dict.Count > 0 && dict.TryGetValue(id, out CustomClass customClass)) {
+                        if (customClass.Luck < 0f) return true;
+                        FieldInfo private_m_ModLuck = typeof(CharacterStats).GetField("m_ModLuck", BindingFlags.Instance | BindingFlags.NonPublic);
+                        float m_ModLuck = (float)private_m_ModLuck.GetValue(__instance);
+                        __result = customClass.Luck + m_ModLuck + __instance.m_AugmentedLuck + GameFlow.Instance.GameDif.m_StatBonus;
                         return false;
                     }
                     return true;
