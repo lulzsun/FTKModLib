@@ -80,6 +80,7 @@ namespace FTKModLib.Managers {
         public static void ModifyClass(FTK_playerGameStart.ID id, CustomClass customClass) {
             FTK_playerGameStartDB playerClassesDB = TableManager.Instance.Get<FTK_playerGameStartDB>();
             playerClassesDB.m_Array[(int)id] = customClass;
+            playerClassesDB.m_Dictionary[(int)id] = customClass;
             ClassManager.Instance.moddedDictionary.Add((int)id, customClass);
             Logger.LogInfo($"Successfully modified class '{id}'");
         }

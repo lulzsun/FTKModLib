@@ -104,11 +104,13 @@ namespace FTKModLib.Managers {
         public static void ModifyItem(FTK_itembase.ID id, CustomItem customItem) {
             FTK_itemsDB itemsDB = TableManager.Instance.Get<FTK_itemsDB>();
             itemsDB.m_Array[(int)id] = customItem.itemDetails;
+            itemsDB.m_Dictionary[(int)id] = customItem.itemDetails;
             ItemManager.Instance.moddedDictionary.Add((int)id, customItem);
 
             if (FTK_itembase.GetItemBase(id).m_IsWeapon) {
                 FTK_weaponStats2DB weaponsDB = TableManager.Instance.Get<FTK_weaponStats2DB>();
                 weaponsDB.m_Array[(int)id] = customItem.weaponDetails;
+                weaponsDB.m_Dictionary[(int)id] = customItem.weaponDetails;
                 ItemManager.Instance.moddedDictionary.Add((int)id, customItem);
             }
             Logger.LogInfo($"Successfully modified item '{id}' of type '{customItem.ObjectType}'");
