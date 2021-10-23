@@ -60,12 +60,12 @@ namespace FTKModLib.Managers {
                 }
 
                 classManager.successfulLoads++;
-                Logger.LogInfo($"Loaded '{customClass.ID}' of name '{customClass.Name}' from {customClass.PLUGIN_ORIGIN}");
+                Logger.LogInfo($"Successfully added class '{customClass.ID}' of name '{customClass.Name}' from {customClass.PLUGIN_ORIGIN}");
                 return classManager.enums[customClass.m_ID];
             }
             catch (Exception e) {
                 Logger.LogError(e);
-                Logger.LogError($"Failed to load '{customClass.ID}' of name '{customClass.Name}' from {customClass.PLUGIN_ORIGIN}");
+                Logger.LogError($"Failed to add class '{customClass.ID}' of name '{customClass.Name}' from {customClass.PLUGIN_ORIGIN}");
                 return -1;
             }
         }
@@ -81,6 +81,7 @@ namespace FTKModLib.Managers {
             FTK_playerGameStartDB playerClassesDB = TableManager.Instance.Get<FTK_playerGameStartDB>();
             playerClassesDB.m_Array[(int)id] = customClass;
             ClassManager.Instance.moddedDictionary.Add((int)id, customClass);
+            Logger.LogInfo($"Successfully modified class '{id}'");
         }
 
         /// <summary>

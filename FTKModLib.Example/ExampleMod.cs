@@ -35,6 +35,12 @@ namespace FTKModLib.Example {
                     int customHerb = ItemManager.AddItem(new ExampleHerb(), Instance);
                     int customBlade = ItemManager.AddItem(new ExampleBlade(), Instance);
                     int customGun = ItemManager.AddItem(new ExampleGun(), Instance);
+                    ItemManager.ModifyItem(
+                        FTK_itembase.ID.herbGodsbeard1, 
+                        new CustomItem(FTK_itembase.ID.herbGodsbeard1) {
+                            ShopStock = 420
+                        }
+                    );
 
                     ClassManager.AddClass(new ExampleClass(), Instance);
                     ClassManager.ModifyClass(
@@ -47,7 +53,6 @@ namespace FTKModLib.Example {
                             (FTK_itembase.ID)customGun
                         })
                     );
-                    Utils.Logger.LogInfo($"Modified blacksmith class to give our example items");
                 }
             }
         }

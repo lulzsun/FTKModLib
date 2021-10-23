@@ -1,8 +1,9 @@
 ﻿using FTKItemName;
-using Google2u;
+using FTKModLib.Managers;
 using GridEditor;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using static Weapon;
 using Logger = FTKModLib.Utils.Logger;
@@ -22,11 +23,25 @@ namespace FTKModLib.Objects {
     /// </summary>
     public class CustomItem : ConsumableBase {
         internal string PLUGIN_ORIGIN = "null";
-        internal readonly FTK_items itemDetails = new FTK_items();
-        internal readonly FTK_weaponStats2 weaponDetails = new FTK_weaponStats2();
+        internal FTK_items itemDetails = new FTK_items();
+        internal FTK_weaponStats2 weaponDetails = new FTK_weaponStats2();
 
-        public CustomItem() {
-            weaponDetails.m_NoRegularAttack = true;
+        public CustomItem(FTK_itembase.ID baseItem = FTK_itembase.ID.None) {
+            if(baseItem != FTK_itembase.ID.None) {
+                CustomItem source = ItemManager.GetItem(baseItem);
+                this.itemDetails = source.itemDetails;
+                this.weaponDetails = source.weaponDetails;
+                foreach (FieldInfo field in typeof(CustomItem).GetFields()) {
+                    field.SetValue(this, field.GetValue(source));
+                }
+            }
+            else {
+                weaponDetails.m_NoRegularAttack = true;
+                itemDetails.m_Icon = new Sprite();
+                itemDetails.m_IconNonClickable = new Sprite();
+                weaponDetails.m_Icon = new Sprite();
+                weaponDetails.m_IconNonClickable = new Sprite();
+            }
         }
 
         /// <summary>

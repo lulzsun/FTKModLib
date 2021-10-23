@@ -20,6 +20,28 @@ namespace FTKModLib.Managers {
         public Dictionary<int, CustomItem> moddedDictionary = new();
 
         /// <summary>
+        /// Gets a class from TableManager's FTK_itemsDB
+        /// <para>Must be called in a TableManager.Initialize postfix patch.</para>
+        /// </summary>
+        /// <param name="id">The item's id.</param>
+        /// <returns>Returns the item as a CustomItem</returns>
+        public static CustomItem GetItem(FTK_itembase.ID id) {
+            CustomItem customItem = new();
+            FTK_itemsDB itemsDB = TableManager.Instance.Get<FTK_itemsDB>();
+
+            var itemDetails = itemsDB.GetEntry(id);
+            customItem.itemDetails = itemDetails;
+
+            if (itemDetails.m_IsWeapon) {
+                FTK_weaponStats2DB weaponsDB = TableManager.Instance.Get<FTK_weaponStats2DB>();
+
+                var weaponDetails = weaponsDB.GetEntry(id);
+                customItem.weaponDetails = weaponDetails;
+            }
+            return customItem;
+        }
+
+        /// <summary>
         /// Add a custom item.
         /// <para>Must be called in a TableManager.Initialize postfix patch.</para>
         /// </summary>
@@ -62,14 +84,34 @@ namespace FTKModLib.Managers {
                 }
 
                 itemManager.successfulLoads++;
-                Logger.LogInfo($"Loaded '{customItem.ID}' of type '{customItem.ObjectType}' from {customItem.PLUGIN_ORIGIN}");
+                Logger.LogInfo($"Successfully added item '{customItem.ID}' of type '{customItem.ObjectType}' from {customItem.PLUGIN_ORIGIN}");
                 return itemManager.enums[customItem.ID];
             }
             catch (Exception e) {
                 Logger.LogError(e);
-                Logger.LogError($"Failed to load '{customItem.ID}' of type '{customItem.ObjectType}' from {customItem.PLUGIN_ORIGIN}");
+                Logger.LogError($"Failed to add item '{customItem.ID}' of type '{customItem.ObjectType}' from {customItem.PLUGIN_ORIGIN}");
                 return -1;
             }
+        }
+
+        /// <summary>
+        /// Modifies an item from TableManager's FTK_itemsDB (and FTK_weaponStats2DB if weapon)
+        /// <para>Must be called in a TableManager.Initialize postfix patch.</para>
+        /// </summary>
+        /// <param name="id">The item's id.</param>
+        /// <param name="customItem">The new item to override over.</param>
+        /// <returns></returns>
+        public static void ModifyItem(FTK_itembase.ID id, CustomItem customItem) {
+            FTK_itemsDB itemsDB = TableManager.Instance.Get<FTK_itemsDB>();
+            itemsDB.m_Array[(int)id] = customItem.itemDetails;
+            ItemManager.Instance.moddedDictionary.Add((int)id, customItem);
+
+            if (FTK_itembase.GetItemBase(id).m_IsWeapon) {
+                FTK_weaponStats2DB weaponsDB = TableManager.Instance.Get<FTK_weaponStats2DB>();
+                weaponsDB.m_Array[(int)id] = customItem.weaponDetails;
+                ItemManager.Instance.moddedDictionary.Add((int)id, customItem);
+            }
+            Logger.LogInfo($"Successfully modified item '{id}' of type '{customItem.ObjectType}'");
         }
 
         /// <summary>
