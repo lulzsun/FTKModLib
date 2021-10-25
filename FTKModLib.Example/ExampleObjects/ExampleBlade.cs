@@ -4,8 +4,11 @@ using GridEditor;
 using UnityEngine;
 
 namespace FTKModLib.Example {
+    using ProficiencyManager = Managers.ProficiencyManager;
     public class ExampleBlade : CustomItem {
         public ExampleBlade() {
+            int customProf = ProficiencyManager.AddProficiency(new ExampleProficiency());
+
             ID = "CustomBlade1";
             Name = new("Example Blade");
             Prefab = ExampleMod.assetBundle.LoadAsset<GameObject>("Assets/CustomItems/customBlade.prefab");
@@ -14,6 +17,7 @@ namespace FTKModLib.Example {
             SkillType = FTK_weaponStats2.SkillType.toughness;
             WeaponType = Weapon.WeaponType.bladed;
             ProficiencyEffects = new() { // these are the weapon attacks/skills for this custom item
+                [(FTK_proficiencyTable.ID)customProf] = FTK_hitEffect.ID.defaultBlade,
                 [FTK_proficiencyTable.ID.bladeDamage] = FTK_hitEffect.ID.defaultBlade,
                 [FTK_proficiencyTable.ID.fire1] = FTK_hitEffect.ID.defaultBlade,
                 [FTK_proficiencyTable.ID.firestorm1] = FTK_hitEffect.ID.defaultBlade,

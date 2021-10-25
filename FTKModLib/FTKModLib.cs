@@ -1,7 +1,7 @@
 ﻿using BepInEx;
 using HarmonyLib;
 using FTKModLib.Managers;
-using GridEditor;
+using System.Collections.Generic;
 
 namespace FTKModLib {
     [BepInPlugin(PLUGIN_GUID, "FTKModLib", "1.0.0")]
@@ -10,6 +10,7 @@ namespace FTKModLib {
         public const string PLUGIN_GUID = "com.FTKModLib.FTKModLib";
 
         internal static FTKModLib Instance;
+        private List<object> _managers;
 
         private void Awake() {
             Instance = this;
@@ -22,9 +23,12 @@ namespace FTKModLib {
             // was false.
             FullSerializer.fsConfig.SerializeEnumsAsInteger = true;
 
-            AssetManager.Instance.Init();
-            ItemManager.Instance.Init();
-            ClassManager.Instance.Init();
+            _managers = new List<object>() {
+                AssetManager.Instance,
+                Managers.ProficiencyManager.Instance,
+                ItemManager.Instance,
+                ClassManager.Instance,
+            };
 
             Harmony harmony = new Harmony(PLUGIN_GUID);
             harmony.PatchAll();
