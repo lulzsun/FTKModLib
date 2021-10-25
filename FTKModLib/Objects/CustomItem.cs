@@ -37,10 +37,6 @@ namespace FTKModLib.Objects {
             }
             else {
                 weaponDetails.m_NoRegularAttack = true;
-                itemDetails.m_Icon = new Sprite();
-                itemDetails.m_IconNonClickable = new Sprite();
-                weaponDetails.m_Icon = new Sprite();
-                weaponDetails.m_IconNonClickable = new Sprite();
             }
         }
 

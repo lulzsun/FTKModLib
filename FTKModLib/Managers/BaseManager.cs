@@ -5,17 +5,23 @@ namespace FTKModLib {
     ///     The base class for all the library's various Managers
     /// </summary>
     public abstract class BaseManager<T> where T : BaseManager<T>, new() {
-        private static readonly Lazy<T> Lazy =
-                new(() => Activator.CreateInstance(typeof(T), true) as T);
+        private static Lazy<T> Lazy;
 
-        public static T Instance => Lazy.Value;
+        public static T Instance {
+            get {
+                if (Lazy == null) {
+                    Lazy = new(() => Activator.CreateInstance(typeof(T), true) as T);
+                    Utils.Logger.LogInfo("Initializing " + Lazy.Value.GetType().Name);
+                    Lazy.Value.Init();
+                }
+                return Lazy.Value;
+            }
+        }
 
         /// <summary>
         ///     Initialize manager class
         /// </summary>
-        public virtual void Init() {
-            Utils.Logger.LogInfo("Initializing " + this.GetType().Name);
-        }
+        public virtual void Init() { }
     }
 
     /// <summary>

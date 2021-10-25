@@ -60,12 +60,12 @@ namespace FTKModLib.Managers {
                 }
 
                 classManager.successfulLoads++;
-                Logger.LogInfo($"Successfully added class '{customClass.ID}' of name '{customClass.Name}' from {customClass.PLUGIN_ORIGIN}");
+                Logger.LogInfo($"Successfully added class '{customClass.ID}' of name '{customClass.Name._en}' from {customClass.PLUGIN_ORIGIN}");
                 return classManager.enums[customClass.m_ID];
             }
             catch (Exception e) {
                 Logger.LogError(e);
-                Logger.LogError($"Failed to add class '{customClass.ID}' of name '{customClass.Name}' from {customClass.PLUGIN_ORIGIN}");
+                Logger.LogError($"Failed to add class '{customClass.ID}' of name '{customClass.Name._en}' from {customClass.PLUGIN_ORIGIN}");
                 return -1;
             }
         }

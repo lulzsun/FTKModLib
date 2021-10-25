@@ -14,7 +14,6 @@ namespace FTKModLib.Managers {
         public static List<Weapon> Weapons;
 
         public override void Init() {
-            base.Init();
             Weapons = Resources.LoadAll<Weapon>("").ToList();
             Resources.UnloadUnusedAssets();
         }
